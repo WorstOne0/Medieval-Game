@@ -13,7 +13,7 @@ public class Guard : MonoBehaviour {
         for (int i = 0; i < waypoints.Length; i++) {
             waypoints[i] = pathHolder.GetChild(i).position;
             waypoints[i] = new Vector3(waypoints[i].x, transform.position.y, waypoints[i].z);
-        } 
+        }
 
         StartCoroutine(FollowPath(waypoints));
     }
@@ -28,10 +28,10 @@ public class Guard : MonoBehaviour {
         while (true) {
             transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, speed * Time.deltaTime);
 
-            if(transform.position == targetWaypoint) {
+            if (transform.position == targetWaypoint) {
                 targetWaypointIndex = (targetWaypointIndex + 1) % waypoints.Length;
                 targetWaypoint = waypoints[targetWaypointIndex];
-                yield return new WaitForSeconds (waitTime);
+                yield return new WaitForSeconds(waitTime);
 
                 yield return StartCoroutine(TurnToFace(targetWaypoint));
             }
