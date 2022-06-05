@@ -32,8 +32,10 @@ public class Guard : MonoBehaviour {
     void Update() {
         if (CanSeePlayer()) {
             spotlight.color = Color.red;
+            speed = 0;
         } else {
             spotlight.color = originalSpotColor;
+            speed = 5;
         }
     }
 
