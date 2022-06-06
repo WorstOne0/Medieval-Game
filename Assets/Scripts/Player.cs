@@ -9,13 +9,27 @@ public class Player : MonoBehaviour {
     float angle, smoothInputMagnitude, smoothMoveVelocity;
 
     Vector3 velocity;
-    Rigidbody rigidbody;
+    Rigidbody myRigidbody;
+
+    Camera viewCamera;
 
     void Start() {
-        rigidbody = GetComponent<Rigidbody>();
+        myRigidbody = GetComponent<Rigidbody>();
+        viewCamera = Camera.main;
     }
 
     void Update() {
+        Ray ray = viewCamera.ScreenPointToRay(Input.mousePosition);
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+        float rayDistance;
+
+        if (groundPlane.Raycast(ray, out rayDistance)) {
+            Vector3 point = ray.GetPoint(rayDistance);
+            //Debug.DrawLine(ray.origin, point, Color.red);
+            Vector3 adjustedPoint = new Vector3(point.x, transform.position.y, point.z);
+            transform.LookAt(adjustedPoint);
+        }
+
         Vector3 inputDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
         float inputMagnitude = inputDirection.magnitude;
         smoothInputMagnitude = Mathf.SmoothDamp(smoothInputMagnitude, inputMagnitude, ref smoothMoveVelocity, smoothMoveTime);
@@ -24,10 +38,11 @@ public class Player : MonoBehaviour {
         angle = Mathf.LerpAngle(angle, targetAngle, turnSpeed * Time.deltaTime * inputMagnitude);
 
         velocity = transform.forward * moveSpeed * smoothInputMagnitude;
+        //velocity = inputDirection.normalized * moveSpeed * smoothInputMagnitude;
     }
 
     void FixedUpdate() {
-        rigidbody.MoveRotation(Quaternion.Euler(Vector3.up * angle));
-        rigidbody.MovePosition(rigidbody.position + velocity * Time.deltaTime);
+        myRigidbody.MoveRotation(Quaternion.Euler(Vector3.up * angle));
+        myRigidbody.MovePosition(myRigidbody.position + velocity * Time.fixedDeltaTime);
     }
 }
