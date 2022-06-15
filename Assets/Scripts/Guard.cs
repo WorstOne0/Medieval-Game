@@ -12,9 +12,13 @@ public class Guard : MonoBehaviour {
     float viewAngle;
 
     public Transform pathHolder;
+    Vector3 targetWaypoint;
     Transform player;
+    GunController gunController;
 
     void Start() {
+        gunController = GetComponent<GunController>();
+
         player = GameObject.FindGameObjectWithTag("Player").transform;
         viewAngle = spotlight.spotAngle;
         originalSpotColor = spotlight.color;
@@ -33,6 +37,8 @@ public class Guard : MonoBehaviour {
         if (CanSeePlayer()) {
             spotlight.color = Color.red;
             speed = 0;
+            transform.LookAt(player.position);
+            gunController.Shoot();
         } else {
             spotlight.color = originalSpotColor;
             speed = 5;
@@ -57,7 +63,7 @@ public class Guard : MonoBehaviour {
         transform.position = waypoints[0];
 
         int targetWaypointIndex = 1;
-        Vector3 targetWaypoint = waypoints[targetWaypointIndex];
+        targetWaypoint = waypoints[targetWaypointIndex];
         transform.LookAt(targetWaypoint);
 
         while (true) {

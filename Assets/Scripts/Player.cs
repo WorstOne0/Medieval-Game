@@ -12,9 +12,11 @@ public class Player : MonoBehaviour {
     Rigidbody myRigidbody;
 
     Camera viewCamera;
+    GunController gunController;
 
     void Start() {
         myRigidbody = GetComponent<Rigidbody>();
+        gunController = GetComponent<GunController>();
         viewCamera = Camera.main;
     }
 
@@ -35,14 +37,18 @@ public class Player : MonoBehaviour {
         smoothInputMagnitude = Mathf.SmoothDamp(smoothInputMagnitude, inputMagnitude, ref smoothMoveVelocity, smoothMoveTime);
 
         float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-        angle = Mathf.LerpAngle(angle, targetAngle, turnSpeed * Time.deltaTime * inputMagnitude);
+        angle = Mathf.LerpAngle(angle, targetAngle, turnSpeed * Time.unscaledDeltaTime * inputMagnitude);
 
         velocity = transform.forward * moveSpeed * smoothInputMagnitude;
         //velocity = inputDirection.normalized * moveSpeed * smoothInputMagnitude;
+
+        if (Input.GetMouseButton(0)) {
+            gunController.Shoot();
+        }
     }
 
     void FixedUpdate() {
         myRigidbody.MoveRotation(Quaternion.Euler(Vector3.up * angle));
-        myRigidbody.MovePosition(myRigidbody.position + velocity * Time.fixedDeltaTime);
+        myRigidbody.MovePosition(myRigidbody.position + velocity * Time.fixedUnscaledDeltaTime);
     }
 }

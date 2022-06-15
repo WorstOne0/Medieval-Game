@@ -356,6 +356,7 @@
 "Assets/Scripts/Gun.cs"
 "Assets/Scripts/GunController.cs"
 "Assets/Scripts/Player.cs"
+"Assets/Scripts/Projectile.cs"
 -langversion:9.0
 
 /deterministic
