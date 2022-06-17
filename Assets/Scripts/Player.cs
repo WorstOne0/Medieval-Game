@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
+public class Player : LivingEntity {
     public float moveSpeed = 7;
     public float smoothMoveTime = .1f, turnSpeed = 8;
 
@@ -13,10 +13,13 @@ public class Player : MonoBehaviour {
 
     Camera viewCamera;
     GunController gunController;
+    FlagController flagController;
 
-    void Start() {
+    public override void Start() {
+        base.Start();
         myRigidbody = GetComponent<Rigidbody>();
         gunController = GetComponent<GunController>();
+        flagController = GetComponent<FlagController>();
         viewCamera = Camera.main;
     }
 
@@ -36,19 +39,32 @@ public class Player : MonoBehaviour {
         float inputMagnitude = inputDirection.magnitude;
         smoothInputMagnitude = Mathf.SmoothDamp(smoothInputMagnitude, inputMagnitude, ref smoothMoveVelocity, smoothMoveTime);
 
-        float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-        angle = Mathf.LerpAngle(angle, targetAngle, turnSpeed * Time.unscaledDeltaTime * inputMagnitude);
+        Matrix4x4 targetRotation = Matrix4x4.Rotate(Quaternion.Euler(0, 45, 0));
+        Vector3 skewedInput = targetRotation.MultiplyPoint3x4(inputDirection);
 
-        velocity = transform.forward * moveSpeed * smoothInputMagnitude;
-        //velocity = inputDirection.normalized * moveSpeed * smoothInputMagnitude;
+        //float targetAngle = Mathf.Atan2(skewedInput.x, skewedInput.z) * Mathf.Rad2Deg;
+        //angle = Mathf.LerpAngle(angle, targetAngle, turnSpeed * Time.unscaledDeltaTime * inputMagnitude);
+
+        velocity = skewedInput * moveSpeed * smoothInputMagnitude;
+        //velocity = transform.forward * moveSpeed * smoothInputMagnitude;
 
         if (Input.GetMouseButton(0)) {
             gunController.Shoot();
         }
     }
 
+    void OnTriggerEnter(Collider hitCollider) {
+        if (hitCollider.tag == "Finish") {
+            FunctionTimer.Create(flagController.EquipFlag, 3f);
+        }
+
+        if (hitCollider.tag == "Respawn") {
+            FunctionTimer.Create(flagController.UnequipFlag, 1f);
+        }
+    }
+
     void FixedUpdate() {
-        myRigidbody.MoveRotation(Quaternion.Euler(Vector3.up * angle));
-        myRigidbody.MovePosition(myRigidbody.position + velocity * Time.fixedUnscaledDeltaTime);
+        //myRigidbody.MoveRotation(Quaternion.Euler(Vector3.up * angle));
+        myRigidbody.MovePosition(myRigidbody.position + velocity * Time.fixedDeltaTime);
     }
 }

@@ -41,6 +41,12 @@
      <Compile Include="Assets\Scripts\GunController.cs" />
      <Compile Include="Assets\Scripts\Guard.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
+     <Compile Include="Assets\Scripts\FunctionTimer.cs" />
+     <Compile Include="Assets\Scripts\FlagController.cs" />
+     <Compile Include="Assets\Scripts\Flag.cs" />
+     <Compile Include="Assets\Scripts\Melee.cs" />
+     <Compile Include="Assets\Scripts\IDamageable.cs" />
+     <Compile Include="Assets\Scripts\LivingEntity.cs" />
     <Reference Include="UnityEngine">
         <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.4f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

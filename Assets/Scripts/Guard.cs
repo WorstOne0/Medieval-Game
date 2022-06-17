@@ -2,21 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Guard : MonoBehaviour {
-    public float speed = 5, waitTime = .3f, turnSpeed = 90;
+public class Guard : LivingEntity {
+    public float speed = 5;
+    public float waitTime = .3f;
+    public float turnSpeed = 90;
+    public float timeToSpotPlayer = 1f;
 
     Color originalSpotColor;
     public Light spotlight;
     public float viewDistance;
     public LayerMask viewMask;
     float viewAngle;
+    float playerVisibleTimer;
 
     public Transform pathHolder;
     Vector3 targetWaypoint;
     Transform player;
     GunController gunController;
 
-    void Start() {
+    public override void Start() {
+        base.Start();
         gunController = GetComponent<GunController>();
 
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -35,13 +40,19 @@ public class Guard : MonoBehaviour {
 
     void Update() {
         if (CanSeePlayer()) {
-            spotlight.color = Color.red;
+            playerVisibleTimer += Time.deltaTime;
+        } else {
+            playerVisibleTimer -= Time.deltaTime;
+            speed = 5;
+        }
+
+        playerVisibleTimer = Mathf.Clamp(playerVisibleTimer, 0, timeToSpotPlayer);
+        spotlight.color = Color.Lerp(originalSpotColor, Color.red, playerVisibleTimer / timeToSpotPlayer);
+
+        if (playerVisibleTimer >= timeToSpotPlayer) {
             speed = 0;
             transform.LookAt(player.position);
             gunController.Shoot();
-        } else {
-            spotlight.color = originalSpotColor;
-            speed = 5;
         }
     }
 
