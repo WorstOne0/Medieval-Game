@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FunctionTimer {
-
     public static FunctionTimer Create(Action action, float time) {
         GameObject gameObject = new GameObject("FunctionTimer", typeof(MonoBehaviourHook));
 

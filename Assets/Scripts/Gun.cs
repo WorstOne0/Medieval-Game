@@ -5,8 +5,8 @@ using UnityEngine;
 public class Gun : MonoBehaviour {
     public Transform muzzle;
     public Projectile projectile;
-    public float msBetweenShots = 200;
-    public float muzzleVelocity = 12;
+
+    public float msBetweenShots = 200, muzzleVelocity = 12;
 
     float nextShootTime;
 

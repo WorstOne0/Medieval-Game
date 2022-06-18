@@ -4,27 +4,35 @@ using UnityEngine;
 
 public class Guard : LivingEntity {
     public float speed = 5;
-    public float waitTime = .3f;
-    public float turnSpeed = 90;
-    public float timeToSpotPlayer = 1f;
+    public float waitTime = .3f, turnSpeed = 90, timeToSpotPlayer = 1f;
 
     Color originalSpotColor;
     public Light spotlight;
     public float viewDistance;
     public LayerMask viewMask;
-    float viewAngle;
-    float playerVisibleTimer;
+    float viewAngle, playerVisibleTimer;
 
     public Transform pathHolder;
     Vector3 targetWaypoint;
     Transform player;
+    LivingEntity playerEntity;
     GunController gunController;
 
-    public override void Start() {
+    bool hasTarget = false;
+
+    protected override void Start() {
         base.Start();
+
         gunController = GetComponent<GunController>();
 
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        if (GameObject.FindGameObjectWithTag("Player") != null) {
+            hasTarget = true;
+
+            player = GameObject.FindGameObjectWithTag("Player").transform;
+            playerEntity = player.GetComponent<LivingEntity>();
+            playerEntity.OnDeath += OnTargetDeath;
+        }
+
         viewAngle = spotlight.spotAngle;
         originalSpotColor = spotlight.color;
 
@@ -39,25 +47,33 @@ public class Guard : LivingEntity {
     }
 
     void Update() {
-        if (CanSeePlayer()) {
-            playerVisibleTimer += Time.deltaTime;
+        if (hasTarget) {
+            if (CanSeePlayer()) {
+                playerVisibleTimer += Time.deltaTime;
+            } else {
+                playerVisibleTimer -= Time.deltaTime;
+                speed = 5;
+            }
+
+            playerVisibleTimer = Mathf.Clamp(playerVisibleTimer, 0, timeToSpotPlayer);
+            // Blend from white to red
+            spotlight.color = Color.Lerp(originalSpotColor, Color.red, playerVisibleTimer / timeToSpotPlayer);
+
+            // If player visible for long enough
+            if (playerVisibleTimer >= timeToSpotPlayer) {
+                speed = 0;
+                transform.LookAt(player.position);
+
+                gunController.Shoot();
+            }
         } else {
-            playerVisibleTimer -= Time.deltaTime;
             speed = 5;
-        }
-
-        playerVisibleTimer = Mathf.Clamp(playerVisibleTimer, 0, timeToSpotPlayer);
-        spotlight.color = Color.Lerp(originalSpotColor, Color.red, playerVisibleTimer / timeToSpotPlayer);
-
-        if (playerVisibleTimer >= timeToSpotPlayer) {
-            speed = 0;
-            transform.LookAt(player.position);
-            gunController.Shoot();
+            spotlight.color = originalSpotColor;
         }
     }
 
     bool CanSeePlayer() {
-        if (Vector3.Distance(transform.position, player.position) < viewDistance) {
+        if (Vector3.Distance(transform.position, player.position) < viewDistance && player != null) {
             Vector3 dirToPlayer = (player.position - transform.position).normalized;
             float angleBetweenGuardAndPlayer = Vector3.Angle(transform.forward, dirToPlayer);
             if (angleBetweenGuardAndPlayer < viewAngle / 2f) {
@@ -117,6 +133,10 @@ public class Guard : LivingEntity {
 
         Gizmos.color = Color.red;
         Gizmos.DrawRay(transform.position, transform.forward * viewDistance);
+    }
+
+    void OnTargetDeath() {
+        hasTarget = false;
     }
 }
 
